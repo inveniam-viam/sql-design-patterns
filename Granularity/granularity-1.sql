@@ -32,3 +32,27 @@ SELECT creation_date
 FROM bigquery-public-data.stackoverflow.post_history
 GROUP BY 1, 2, 3, 4
 HAVING COUNT(*) > 1;
+
+
+-- Granularity Manipulation - AGGREGATION
+
+-- reducing level of detail by grouping
+-- grain becomes more coarse post-aggregation
+
+SELECT ph.post_id
+     , ph.user_id
+     , ph.creation_date AS activity_date
+     , CASE WHEN ph.post_history_type_id IN (1,2,3) THEN 'created'
+            WHEN ph.post_history_type_id IN (4,5,6,) THEN 'edited'
+        END AS activity_type
+FROM bigquery-public-data.stackoverflow.post_history ph
+WHERE
+    TRUE
+    AND ph.post_history_type_id BETWEEN 1 AND 6
+    AND ph.user_id > 0                              -- excluding automated processes
+    AND ph.user_id IS NOT NULL                      -- excluding deleted accounts
+    AND ph.creation_date >= '2021-06-01'
+    AND ph.creation_date <= '2021-09-30'
+    AND ph.post_id = 69301792
+GROUP BY 
+    1, 2, 3, 4;
